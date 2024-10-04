@@ -13,7 +13,8 @@ public class PropertiesUtils {
 
     /* properties 에서 가져올 상수를 정의합니다. */
     public enum PropertyVariable {
-        MAP("bot.map.base.path")
+        MAP("bot.map.base.path"),
+        CSV("bot.csv.path"),
         ;
 
         private final String key;

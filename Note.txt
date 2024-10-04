@@ -1,0 +1,18 @@
+Addon 이나 기본 건물이 변경된 경우, 원래의 형태로만 BuildingType 에 기록되며
+세세한 것들은 UnitType 을 참조하도록 하는 것을 원칙으로 한다.
+
+할 일:
+- Simcity (건물 효과적으로 위치 선정하는 방법)
+
+모든 테스트의 커버리지는 80-90% 를 만족해야한다. (최소: 80.0)
+커버리지 확인은 IntelliJ Ultimate 기준 Run 'Tests in '...' with Coverage 를 통해 확인한다.
+* Class Coverage 는 90% 이상
+* Method Coverage 는 복사(clone, 혹은 깊은/얕은 복사), toString 등은 제외하는 것이
+IntelliJ 자체적으로 지원해주고 있지 않으므로 80% 이상 으로 유지하되,
+필수적이지 않거나 테스트 유의미 하지 않거나 등의 메소드들(toString, clone, 얕은/깊은 복사 등)은
+수동으로 해당 메소드들을 Coverage 에서 제외한 이후 계산하여 80% 이상을 유지하도록 한다.
+
+Line Coverage 는 제외하되, 가능한 Branch Coverage 는 80% 이상 유지하도록 한다.
+단, 모든 조건을 다 체크하기 어려울 경우 해당 조건들의 구조적 상태를 확인하거나
+Unit 테스트 작성 이후 통과하는 방향으로 한다.
+

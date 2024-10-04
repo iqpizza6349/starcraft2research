@@ -13,9 +13,12 @@ dependencies {
     //noinspection VulnerableLibrariesLocal
     implementation 'com.github.ocraft:ocraft-s2client-bot:0.4.20'
     implementation 'ch.qos.logback:logback-classic:1.5.8'
-    testImplementation 'org.slf4j:slf4j-simple:2.0.16'
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.assertj:assertj-core:3.26.3'
+    testImplementation 'org.mockito:mockito-core:5.14.1'
 }
 
 test {

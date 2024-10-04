@@ -1,31 +1,47 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
-    <!-- 콘솔에 출력하는 appender 설정 -->
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+
+    <!-- 콘솔에서는 INFO 레벨 이상의 로그만 출력 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level> <!-- INFO 이상의 로그만 콘솔에 출력 -->
+        </filter>
     </appender>
 
-    <!-- 로그 파일로 출력하는 appender 설정 -->
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/latest.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- 매일 새로운 로그 파일 생성 -->
-            <fileNamePattern>logs/latest.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>30</maxHistory> <!-- 로그 파일을 30일간 유지 -->
-        </rollingPolicy>
+    <!-- info 로그를 latest.log와 날짜별 파일에 저장 -->
+    <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/info-%d{yyyy-MM-dd}.log</file>
+        <append>true</append> <!-- 같은 날짜면 이어 기록 -->
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
+
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level> <!-- INFO 이상의 로그만 기록 -->
+        </filter>
     </appender>
 
-    <!-- 기본 root 로거 설정: 모든 패키지는 info, warn, error 로그만 표시 -->
+    <!-- 특정 패키지의 DEBUG 로그를 debug.log에 저장 -->
+    <appender name="DEBUG_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/debug.log</file> <!-- debug.log 파일 경로 지정 -->
+        <append>false</append> <!-- 덮어쓰기 모드로 설정하여 새로 작성 -->
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss:SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ROOT 로거: INFO 이상의 로그는 콘솔과 latest.log에 기록 -->
     <root level="info">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE" />
+        <appender-ref ref="CONSOLE" /> <!-- 콘솔에 INFO 이상 로그 기록 -->
+        <appender-ref ref="INFO_FILE" /> <!-- latest.log와 날짜별 파일에 INFO 이상 로그 기록 -->
     </root>
 
-    <!-- com.example 패키지에 대해 debug 레벨까지 로그 표시 -->
-    <logger name="io.iqpizza" level="debug" />
+    <!-- io.iqpizza 패키지에 대한 DEBUG 및 INFO 로그 설정 -->
+    <logger name="io.iqpizza" level="debug" additivity="true">
+        <appender-ref ref="DEBUG_FILE" /> <!-- io.iqpizza 패키지의 DEBUG 로그는 debug.log에만 기록 -->
+    </logger>
+
 </configuration>

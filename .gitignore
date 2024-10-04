@@ -47,3 +47,6 @@ logs
 ### gradle bin  ###
 gradlew
 gradlew.bat
+
+### csv ###
+csv
