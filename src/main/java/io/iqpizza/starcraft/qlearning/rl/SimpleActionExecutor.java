@@ -65,9 +65,6 @@ public class SimpleActionExecutor implements ActionExecutor {
      */
     @Override
     public State getCurrentState() {
-        // 상태를 사용했고, 최신 상태가 아니라는 것을 갱신
-        GameManager.getInstance().useCurrentState();
-
         // 현재 게임 관측 데이터를 통해 상태를 얻습니다.
         ObservationInterface observation = GameManager.getObserver();
 

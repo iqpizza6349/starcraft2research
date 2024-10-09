@@ -70,34 +70,32 @@ public class Agent {
         boolean done = false;
 
         while (!done && coordinator.update()) {
-            if (GameManager.getInstance().isLatestState()) {
-                // 현재 상태에서 행동 선택
-                ActionType action = learningAgent.chooseAction(state);
+            // 현재 상태에서 행동 선택
+            ActionType action = learningAgent.chooseAction(state);
 
-                if (action != null) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("choose action: {}. minerals: {}, gas: {}", action, state.minerals(), state.gas());
-                    }
-
-                    // 선택한 행동을 환경에 적용하고 보상과 다음 상태 받기
-                    State nextState = actionExecutor.execute(action);
-                    log.debug("{} action executed.", action);
-
-                    int reward = rewardCalculator.calculateReward(state, action, nextState);
-                    log.debug("give reward for action {}: {}", action, reward);
-
-                    done = progressMonitor.isGameEnd();  // 게임이 끝났는 지 확인
-
-                    // Q 테이블 업데이트
-                    learningAgent.updateQTable(state, action, reward, nextState);
-
-                    // 상태 갱신
-                    state = nextState;
+            if (action != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("choose action: {}. minerals: {}, gas: {}", action, state.minerals(), state.gas());
                 }
-                else {
-                    // 행동이 null, 즉 없을 경우 행동 없이 값만 갱신
-                    state = actionExecutor.getCurrentState();
-                }
+
+                // 선택한 행동을 환경에 적용하고 보상과 다음 상태 받기
+                State nextState = actionExecutor.execute(action);
+                log.debug("{} action executed.", action);
+
+                int reward = rewardCalculator.calculateReward(state, action, nextState);
+                log.debug("give reward for action {}: {}", action, reward);
+
+                done = progressMonitor.isGameEnd();  // 게임이 끝났는 지 확인
+
+                // Q 테이블 업데이트
+                learningAgent.updateQTable(state, action, reward, nextState);
+
+                // 상태 갱신
+                state = nextState;
+            }
+            else {
+                // 행동이 null, 즉 없을 경우 행동 없이 값만 갱신
+                state = actionExecutor.getCurrentState();
             }
         }
 

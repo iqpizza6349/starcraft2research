@@ -6,6 +6,10 @@ import com.github.ocraft.s2client.protocol.data.Units;
 import com.github.ocraft.s2client.protocol.spatial.Point2d;
 import com.github.ocraft.s2client.protocol.unit.Alliance;
 import com.github.ocraft.s2client.protocol.unit.Unit;
+import io.iqpizza.starcraft.debug.GameDebugDrawer;
+import io.iqpizza.starcraft.simcity.Building;
+import io.iqpizza.starcraft.simcity.BuildingSizeUtils;
+import io.iqpizza.starcraft.simcity.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +26,33 @@ public class Bot extends S2Agent {
     public void onGameStart() {
         // 게임이 시작. 정확히는 로깅 상태일때는 단순 로그만 남기면 된다.
         log.info("Starcraft Ⅱ Bot says: 'Hello, World!'");
-        GameManager.getInstance().updateObservers(observation(), actions(), query());
+        GameManager.getInstance().updateObservers(observation(), actions(), query());   // 옵저버, 프록시 등 최초 초기화
+        GameManager.getInstance().initializeMap();  // Map 초기화
+        initializeStaticUnits();
+    }
+
+    // 정적 유닛인 미네랄, 가스, 파괴가능한 조형(바위 등)을 초기화한다.
+    private void initializeStaticUnits() {
+        List<UnitInPool> allUnits = observation().getUnits();
+        for (UnitInPool unitPool : allUnits) {
+            Unit unit = unitPool.unit();
+            Point2d position = unit.getPosition().toPoint2d();
+
+            if (unit.getType() instanceof Units units) {
+                int posX = (int) position.getX();
+                int posY = (int) position.getY();
+
+                if (BuildingSizeUtils.isMineralType(units)) {
+                    GameManager.getInstance().updateMineralField(posX, posY, true);
+                }
+                else if (BuildingSizeUtils.isGasGeyserType(units)) {
+                    GameManager.getInstance().updateGasField(posX, posY, true);
+                }
+                else if (BuildingSizeUtils.isDestructable(units)) {
+                    GameManager.getInstance().updateDestructableStructure(posX, posY, true);
+                }
+            }
+        }
     }
 
     @Override
@@ -36,7 +66,8 @@ public class Bot extends S2Agent {
             return;
         }
 
-        GameManager.getInstance().updateObservers(observation(), actions(), query());
+        // 디버깅 :: 미네랄과 가스 위치 그리기
+        GameDebugDrawer.drawResources(debug(), GameManager.getInstance().getGameMap());
     }
 
     @Override
@@ -74,5 +105,40 @@ public class Bot extends S2Agent {
             }
         }
         return Optional.ofNullable(target);
+    }
+
+    @Override
+    public void onUnitDestroyed(UnitInPool unitInPool) {
+        Unit unit = unitInPool.unit();
+        Units units = (Units) unit.getType();
+        Point2d position = unit.getPosition().toPoint2d();
+
+        if (BuildingSizeUtils.isMineralType(units) || BuildingSizeUtils.isGasGeyserType(units)) {
+            if (BuildingSizeUtils.isMineralType(units)) {
+                GameManager.getInstance().updateMineralField((int) position.getX(), (int) position.getY(), false);
+            } else {
+                GameManager.getInstance().updateGasField((int) position.getX(), (int) position.getY(), false);
+            }
+        }
+        else if (BuildingSizeUtils.isDestructable(units)) {
+            GameManager.getInstance().updateDestructableStructure((int) position.getX(), (int) position.getY(), false);
+        }
+        else if (BuildingSizeUtils.isBuildingType(units)) {
+            Size buildingSize = BuildingSizeUtils.getBuildingSize(units);
+
+            GameManager.getInstance().destroyBuilding((int) position.getX(), (int) position.getY(), buildingSize);
+        }
+    }
+
+    @Override
+    public void onBuildingConstructionComplete(UnitInPool unitInPool) {
+        Unit unit = unitInPool.unit();
+        Units units = (Units) unit.getType();
+        if (BuildingSizeUtils.isBuildingType(units)) {
+            Point2d position = unit.getPosition().toPoint2d();
+            Size buildingSize = BuildingSizeUtils.getBuildingSize(units);
+
+            GameManager.getInstance().placeBuliding((int) position.getX(), (int) position.getY(), new Building(units, buildingSize));
+        }
     }
 }

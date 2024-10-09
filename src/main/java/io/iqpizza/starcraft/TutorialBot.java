@@ -39,7 +39,7 @@ public class TutorialBot {
 
         S2Coordinator coordinator = S2Coordinator.setup()
                 .loadSettings(args)
-                .setRealtime(false)
+                .setRealtime(true)
                 .setMultithreaded(true)
                 .setParticipants(
                         S2Coordinator.createParticipant(Race.TERRAN, bot),
