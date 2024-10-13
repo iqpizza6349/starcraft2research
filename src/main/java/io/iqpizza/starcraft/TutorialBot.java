@@ -10,7 +10,6 @@ import io.iqpizza.starcraft.qlearning.qtable.QTable;
 import io.iqpizza.starcraft.qlearning.qtable.QTableLoader;
 import io.iqpizza.starcraft.qlearning.rl.*;
 import io.iqpizza.starcraft.qlearning.utils.QTableUtils;
-import io.iqpizza.starcraft.utils.PropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

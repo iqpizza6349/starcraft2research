@@ -10,7 +10,7 @@ import io.iqpizza.starcraft.qlearning.qtable.QTableSaver;
 import io.iqpizza.starcraft.qlearning.rl.ActionExecutor;
 import io.iqpizza.starcraft.qlearning.rl.GameProgressMonitor;
 import io.iqpizza.starcraft.qlearning.rl.RewardCalculator;
-import io.iqpizza.starcraft.utils.PropertiesUtils;
+import io.iqpizza.starcraft.PropertiesUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;

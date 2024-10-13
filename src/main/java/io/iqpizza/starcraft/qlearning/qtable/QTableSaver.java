@@ -3,7 +3,7 @@ package io.iqpizza.starcraft.qlearning.qtable;
 import io.iqpizza.starcraft.qlearning.protocol.ActionType;
 import io.iqpizza.starcraft.qlearning.protocol.State;
 import io.iqpizza.starcraft.qlearning.utils.QTableUtils;
-import io.iqpizza.starcraft.utils.PropertiesUtils;
+import io.iqpizza.starcraft.PropertiesUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
