@@ -8,8 +8,10 @@ import com.github.ocraft.s2client.protocol.unit.Alliance;
 import com.github.ocraft.s2client.protocol.unit.Unit;
 import io.iqpizza.starcraft.debug.GameDebugDrawer;
 import io.iqpizza.starcraft.simcity.Building;
-import io.iqpizza.starcraft.simcity.BuildingSizeUtils;
+import io.iqpizza.starcraft.utils.BuildingSizeUtils;
 import io.iqpizza.starcraft.simcity.Size;
+import io.iqpizza.starcraft.utils.UnitProductUtils;
+import io.iqpizza.starcraft.utils.UnitTypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,14 +44,18 @@ public class Bot extends S2Agent {
                 int posX = (int) position.getX();
                 int posY = (int) position.getY();
 
-                if (BuildingSizeUtils.isMineralType(units)) {
+                if (UnitTypeUtils.isMineralType(units)) {
                     GameManager.getInstance().updateMineralField(posX, posY, true);
                 }
-                else if (BuildingSizeUtils.isGasGeyserType(units)) {
+                else if (UnitTypeUtils.isGasGeyserType(units)) {
                     GameManager.getInstance().updateGasField(posX, posY, true);
                 }
-                else if (BuildingSizeUtils.isDestructable(units)) {
+                else if (UnitTypeUtils.isDestructable(units)) {
                     GameManager.getInstance().updateDestructableStructure(posX, posY, true);
+                }
+                else if (UnitProductUtils.isSelfUnit(unit, observation()) && UnitTypeUtils.isBuildingType(units)) {
+                    // 내 건물들은 위치 저장
+                    GameManager.getInstance().getConstructManager().addFriendlyBuilding(position);
                 }
             }
         }
@@ -62,12 +68,16 @@ public class Bot extends S2Agent {
 
     @Override
     public void onStep() {
-        if (observation().getGameLoop() % 24 != 0) {
-            return;
-        }
-
         // 디버깅 :: 미네랄과 가스 위치 그리기
         GameDebugDrawer.drawResources(debug(), GameManager.getInstance().getGameMap());
+
+        // 디버깅 :: 자신의 건물 위치 그리기
+        List<Point2d> friendlyBuildings = GameManager.getInstance().getConstructManager().getFriendlyBuildings();
+        for (Point2d point : friendlyBuildings) {
+            GameDebugDrawer.drawBuildingSquare(debug(), point);
+        }
+
+        debug().sendDebug();
     }
 
     @Override
@@ -113,20 +123,23 @@ public class Bot extends S2Agent {
         Units units = (Units) unit.getType();
         Point2d position = unit.getPosition().toPoint2d();
 
-        if (BuildingSizeUtils.isMineralType(units) || BuildingSizeUtils.isGasGeyserType(units)) {
-            if (BuildingSizeUtils.isMineralType(units)) {
+        if (UnitTypeUtils.isMineralType(units) || UnitTypeUtils.isGasGeyserType(units)) {
+            if (UnitTypeUtils.isMineralType(units)) {
                 GameManager.getInstance().updateMineralField((int) position.getX(), (int) position.getY(), false);
             } else {
                 GameManager.getInstance().updateGasField((int) position.getX(), (int) position.getY(), false);
             }
         }
-        else if (BuildingSizeUtils.isDestructable(units)) {
+        else if (UnitTypeUtils.isDestructable(units)) {
             GameManager.getInstance().updateDestructableStructure((int) position.getX(), (int) position.getY(), false);
         }
-        else if (BuildingSizeUtils.isBuildingType(units)) {
+        else if (UnitTypeUtils.isBuildingType(units)) {
             Size buildingSize = BuildingSizeUtils.getBuildingSize(units);
-
             GameManager.getInstance().destroyBuilding((int) position.getX(), (int) position.getY(), buildingSize);
+            if (UnitProductUtils.isSelfUnit(unit, observation())) {
+                // 내 소유 건물이 파괴되었다면 위치 갱신
+                GameManager.getInstance().getConstructManager().removeFriendlyBuilding(position);
+            }
         }
     }
 
@@ -134,11 +147,15 @@ public class Bot extends S2Agent {
     public void onBuildingConstructionComplete(UnitInPool unitInPool) {
         Unit unit = unitInPool.unit();
         Units units = (Units) unit.getType();
-        if (BuildingSizeUtils.isBuildingType(units)) {
+        if (UnitTypeUtils.isBuildingType(units)) {
             Point2d position = unit.getPosition().toPoint2d();
             Size buildingSize = BuildingSizeUtils.getBuildingSize(units);
-
             GameManager.getInstance().placeBuliding((int) position.getX(), (int) position.getY(), new Building(units, buildingSize));
+            
+            if (UnitProductUtils.isSelfUnit(unit, observation())) {
+                // 내 소유 건물이 건설 완료되었다면 위치 갱신
+                GameManager.getInstance().getConstructManager().addFriendlyBuilding(position);
+            }
         }
     }
 }

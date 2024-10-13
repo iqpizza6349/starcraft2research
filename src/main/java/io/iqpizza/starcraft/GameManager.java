@@ -9,6 +9,7 @@ import com.github.ocraft.s2client.protocol.response.ResponseGameInfo;
 import com.github.ocraft.s2client.protocol.spatial.RectangleI;
 import com.github.ocraft.s2client.protocol.spatial.Size2dI;
 import io.iqpizza.starcraft.simcity.Building;
+import io.iqpizza.starcraft.simcity.ConstructManager;
 import io.iqpizza.starcraft.simcity.GameMap;
 import io.iqpizza.starcraft.simcity.Size;
 import lombok.Getter;
@@ -24,6 +25,12 @@ public final class GameManager {
     private QueryInterface query;
     @Getter
     private GameMap gameMap;
+    @Getter
+    private final ConstructManager constructManager;
+
+    public GameManager() {
+        this.constructManager = ConstructManager.getInstance();
+    }
 
     public static synchronized ObservationInterface getObserver() {
         return getInstance().observer;
@@ -48,6 +55,9 @@ public final class GameManager {
             Size2dI mapSize = raw.getMapSize();
             initializeMap(mapSize.getX(), mapSize.getY(), raw.getPlayableArea());
         }
+
+        // 맵이 초기화된다면 내 건물 리스트들도 전부 초기화
+        constructManager.clearBuildings();
     }
 
     public synchronized void updateObservers(ObservationInterface observer, ActionInterface action, QueryInterface query) {

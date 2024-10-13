@@ -1,8 +1,10 @@
 package io.iqpizza.starcraft.utils;
 
+import com.github.ocraft.s2client.bot.gateway.ObservationInterface;
 import com.github.ocraft.s2client.protocol.data.Abilities;
 import com.github.ocraft.s2client.protocol.data.Units;
 import com.github.ocraft.s2client.protocol.game.Race;
+import com.github.ocraft.s2client.protocol.unit.Unit;
 
 import static com.github.ocraft.s2client.protocol.data.Abilities.*;
 import static com.github.ocraft.s2client.protocol.data.Units.*;
@@ -11,8 +13,8 @@ import static com.github.ocraft.s2client.protocol.data.Units.*;
  * Availables 로 해야할 지 유닛 타입별로 해야할지 긴가민가해서
  * 일단 유닛 타입별로 해봄
  */
-public final class UnitProductionUtils {
-    private UnitProductionUtils() {
+public final class UnitProductUtils {
+    private UnitProductUtils() {
         throw new IllegalAccessError("Utility class");
     }
 
@@ -127,6 +129,10 @@ public final class UnitProductionUtils {
             case TERRAN_THOR, TERRAN_BATTLECRUISER -> 6;
             default -> 0;
         };
+    }
+
+    public static boolean isSelfUnit(Unit unit, ObservationInterface observation) {
+        return (unit.getOwner() == observation.getPlayerId());
     }
 
 }
